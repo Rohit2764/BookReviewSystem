@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const BookList = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -30,7 +32,7 @@ const BookList = () => {
       if (sortBy) params.append('sortBy', sortBy);
       if (sortOrder) params.append('sortOrder', sortOrder);
 
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/books?${params.toString()}`);
+      const response = await axios.get(`${API_BASE_URL}/books?${params.toString()}`);
       setBooks(response.data.books);
       const { page: currentPage, totalPages } = response.data;
       setPagination({
@@ -58,7 +60,7 @@ const BookList = () => {
   const handleDelete = async (bookId) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/books/${bookId}`, {
+      await axios.delete(`${API_BASE_URL}/books/${bookId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
