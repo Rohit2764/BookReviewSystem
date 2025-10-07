@@ -3,10 +3,12 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 
 const generateToken = (userId) => {
+  // This function will throw an error if JWT_SECRET is missing
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
-exports.signup = async (req, res) => {
+// Pass `next` to the function to handle errors
+exports.signup = async (req, res, next) => { 
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -21,8 +23,9 @@ exports.signup = async (req, res) => {
     }
 
     const user = new User({ name, email, password });
-    await user.save();
+    await user.save(); // This part is working
 
+    // The error is likely happening on the next line if JWT_SECRET is missing
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -31,11 +34,13 @@ exports.signup = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    // Pass the error to the errorHandler middleware
+    next(error); 
   }
 };
 
-exports.login = async (req, res) => {
+// Pass `next` to the function to handle errors
+exports.login = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -62,11 +67,13 @@ exports.login = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    // Pass the error to the errorHandler middleware
+    next(error);
   }
 };
 
-exports.getProfile = async (req, res) => {
+// Pass `next` to the function to handle errors
+exports.getProfile = async (req, res, next) => {
   try {
     const user = req.user;
     const books = await require('../models/Book').find({ addedBy: user._id });
@@ -78,6 +85,7 @@ exports.getProfile = async (req, res) => {
       reviews
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    // Pass the error to the errorHandler middleware
+    next(error);
   }
 };
