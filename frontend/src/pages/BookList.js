@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// Step 1: Import the new api instance instead of axios
+import api from '../api'; 
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Step 2: Remove the old API_BASE_URL constant
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const BookList = () => {
   const { user } = useAuth();
@@ -14,7 +16,6 @@ const BookList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // New states for search, filter, sort
   const [search, setSearch] = useState('');
   const [genreFilter, setGenreFilter] = useState('');
   const [yearFilter, setYearFilter] = useState('');
@@ -32,7 +33,9 @@ const BookList = () => {
       if (sortBy) params.append('sortBy', sortBy);
       if (sortOrder) params.append('sortOrder', sortOrder);
 
-      const response = await axios.get(`${API_BASE_URL}/books?${params.toString()}`);
+      // Step 3: Use the new 'api' instance. Notice we only need the endpoint now.
+      const response = await api.get(`/books?${params.toString()}`);
+      
       setBooks(response.data.books);
       const { page: currentPage, totalPages } = response.data;
       setPagination({
@@ -60,7 +63,8 @@ const BookList = () => {
   const handleDelete = async (bookId) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/books/${bookId}`, {
+      // Step 4: Update this call to use the 'api' instance as well
+      await api.delete(`/books/${bookId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -75,10 +79,10 @@ const BookList = () => {
     navigate(`/edit-book/${bookId}`);
   };
 
+  // ... the rest of your component's JSX remains exactly the same
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8">Books</h1>
-
       {/* Search, Filter, Sort Controls */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
         <input
@@ -101,7 +105,6 @@ const BookList = () => {
           <option value="Fantasy">Fantasy</option>
           <option value="Science">Science</option>
           <option value="Biography">Biography</option>
-          {/* Add more genres as needed */}
         </select>
         <input
           type="number"

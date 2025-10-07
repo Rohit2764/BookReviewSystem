@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+// Step 1: Import the new api instance
+import api from '../api';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Step 2: Remove the old API_BASE_URL constant
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const AddEditBook = () => {
   const navigate = useNavigate();
@@ -27,7 +29,8 @@ const AddEditBook = () => {
 
   const fetchBook = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/books/${id}`);
+      // Step 3: Use the 'api' instance with a relative path
+      const response = await api.get(`/books/${id}`);
       setFormData({
         title: response.data.book.title,
         author: response.data.book.author,
@@ -49,18 +52,15 @@ const AddEditBook = () => {
     setLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+
       if (isEditing) {
-        await axios.put(`${API_BASE_URL}/books/${id}`, formData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+        // Step 4: Use the 'api' instance for the PUT request
+        await api.put(`/books/${id}`, formData, { headers });
       } else {
-        await axios.post(`${API_BASE_URL}/books`, formData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+        // Step 5: Use the 'api' instance for the POST request
+        await api.post(`/books`, formData, { headers });
       }
       navigate('/');
     } catch (err) {
@@ -69,7 +69,8 @@ const AddEditBook = () => {
       setLoading(false);
     }
   };
-
+  
+  // ... JSX remains the same
   return (
     <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
       <h1 className="text-4xl font-bold mb-8">{isEditing ? 'Edit Book' : 'Add New Book'}</h1>

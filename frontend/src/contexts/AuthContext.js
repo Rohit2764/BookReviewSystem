@@ -1,11 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+// Step 1: Import the new api instance
+import api from '../api';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Step 2: Remove the old API_BASE_URL constant
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -14,19 +16,23 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // You might want to validate token here
-      setUser({ token }); // Simplified, you can decode token for user info
+      // Step 3: Set the header on the api instance, not the global axios
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Here you would typically fetch user data from a '/profile' endpoint
+      // For now, we'll just set a placeholder.
+      setUser({ token }); 
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+      // Step 4: Use the 'api' instance with the relative path
+      const response = await api.post('/auth/login', { email, password });
       const { token, user: userData } = response.data;
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Step 5: Set the header on the 'api' instance
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
       return { success: true };
     } catch (error) {
@@ -36,10 +42,12 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/signup`, { name, email, password });
+      // Step 6: Use the 'api' instance with the relative path
+      const response = await api.post('/auth/signup', { name, email, password });
       const { token, user: userData } = response.data;
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Step 7: Set the header on the 'api' instance
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
       return { success: true };
     } catch (error) {
@@ -49,7 +57,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    // Step 8: Delete the header from the 'api' instance
+    delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };
 

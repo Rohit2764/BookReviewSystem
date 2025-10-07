@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+// Step 1: Import the new api instance
+import api from '../api';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Step 2: Remove the old API_BASE_URL constant
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -15,7 +17,8 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/auth/profile`, {
+      // Step 3: Use the 'api' instance with a relative path
+      const response = await api.get('/auth/profile', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -36,6 +39,7 @@ const Profile = () => {
     }
   }, [user]);
 
+  // ... JSX remains the same
   if (loading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
@@ -72,7 +76,6 @@ const Profile = () => {
               </div>
             </div>
           </div>
-
           <div className="px-6 py-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <section>

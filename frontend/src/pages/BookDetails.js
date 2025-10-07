@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+// Step 1: Import the new api instance
+import api from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import RatingChart from '../components/RatingChart';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Step 2: Remove the old API_BASE_URL constant
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const BookDetails = () => {
   const { id } = useParams();
@@ -30,7 +32,8 @@ const BookDetails = () => {
   const fetchBookDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/books/${id}`);
+      // Step 3: Use the 'api' instance with a relative path
+      const response = await api.get(`/books/${id}`);
       setBook(response.data.book);
       setReviews(response.data.reviews);
       setAverageRating(response.data.averageRating);
@@ -56,7 +59,8 @@ const BookDetails = () => {
     setReviewLoading(true);
     setReviewError(null);
     try {
-      await axios.post(`${API_BASE_URL}/reviews`, {
+      // Step 4: Use the 'api' instance for the POST request
+      await api.post(`/reviews`, {
         bookId: id,
         rating: Number(newReview.rating),
         comment: newReview.comment
@@ -77,7 +81,8 @@ const BookDetails = () => {
   const handleDeleteReview = async (reviewId) => {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/reviews/${reviewId}`, {
+      // Step 5: Use the 'api' instance for the DELETE request
+      await api.delete(`/reviews/${reviewId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -88,6 +93,7 @@ const BookDetails = () => {
     }
   };
 
+  // ... JSX remains the same
   if (loading) return <div className="text-center text-gray-600 dark:text-gray-400 mt-10">Loading...</div>;
   if (error) return <div className="text-center text-red-600 dark:text-red-400 mt-10">{error}</div>;
 
@@ -103,7 +109,6 @@ const BookDetails = () => {
           <RatingChart reviews={reviews} />
         </div>
       </div>
-
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Reviews</h3>
         {reviews.length === 0 && <p className="text-gray-600 dark:text-gray-400">No reviews yet.</p>}
@@ -127,7 +132,6 @@ const BookDetails = () => {
           ))}
         </ul>
       </div>
-
       {user && (
         <div className="mb-8">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Add a Review</h3>
