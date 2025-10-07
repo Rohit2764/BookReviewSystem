@@ -17,7 +17,9 @@ const PORT = process.env.PORT || 10000;
 const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
-app.use(cors());
+app.use(cors({
+    origin: 'https://book-review-system-rkp.vercel.app'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
