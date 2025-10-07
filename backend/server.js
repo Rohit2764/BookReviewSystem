@@ -13,14 +13,11 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 10000; // Render uses PORT env var
+const PORT = process.env.PORT || 10000;
 const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
-app.use(cors({
-    // It's a good practice to restrict the origin in production
-    // origin: process.env.FRONTEND_URL 
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,30 +32,36 @@ app.get('/api/health', (req, res) => {
 });
 
 // --- Error handling middleware ---
-// This should be the last middleware in the chain
 app.use(errorHandler);
 
+// --- Sentinel flag to prevent multiple server starts ---
+let isServerStarted = false;
 
 // --- Function to start the server ---
 const startServer = async () => {
+  // Only proceed if the server hasn't been started yet
+  if (isServerStarted) {
+    console.log('Server has already been started. Ignoring duplicate call.');
+    return;
+  }
+
   try {
     // 1. Connect to MongoDB
     await mongoose.connect(MONGO_URI);
     console.log('Successfully connected to MongoDB!');
 
-    // 2. Start listening for requests ONLY after the DB connection is successful
+    // 2. Start listening for requests
     app.listen(PORT, () => {
       console.log(`Server is listening on port ${PORT}`);
+      // Set the flag to true once the server is successfully listening
+      isServerStarted = true;
     });
 
   } catch (error) {
-    // Log the detailed error and stop the process if the DB connection fails
-    console.error('Failed to connect to MongoDB!', error);
+    console.error('Failed to start server!', error);
     process.exit(1);
   }
 };
-// --- Start the application after DB connection ---
-startServer();
 
 // --- Start the application ---
 startServer();
