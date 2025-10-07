@@ -57,6 +57,8 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+// --- Start the application after DB connection ---
+startServer();
 
 // --- Start the application ---
 startServer();
